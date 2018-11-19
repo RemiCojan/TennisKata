@@ -21,8 +21,8 @@ public class AppTest {
 		App app = new App(player1, player2);
 		
 		// verification que les scores sont bien à 0 et qu'il n'y a pas de vainqueur déclaré
-		assertEquals(0,app.getScorePlayer(player1));
-        assertEquals(0,app.getScorePlayer(player2));
+		assertEquals("0",app.getScorePlayer(player1));
+        assertEquals("0",app.getScorePlayer(player2));
         assertNull(app.getWinner());
 	}
 	
@@ -58,8 +58,8 @@ public class AppTest {
 		app.getGame().setPointPlayer1(1);
 		app.getGame().setPointPlayer2(2);
 		
-		assertEquals(15,app.getScorePlayer(player1));
-        assertEquals(30,app.getScorePlayer(player2));
+		assertEquals("15",app.getScorePlayer(player1));
+        assertEquals("30",app.getScorePlayer(player2));
 	}
 	
 	@Test
@@ -69,8 +69,9 @@ public class AppTest {
 		App app = new App(player1, player2);
 
 		app.getGame().setPointPlayer1(3);
+		app.getGame().setPointPlayer2(1);
 		
-		assertEquals(40,app.getScorePlayer(player1));
+		assertEquals("40",app.getScorePlayer(player1));
 	}
 	
 	@Test(expected = NullInputException.class )
@@ -86,6 +87,32 @@ public class AppTest {
 	}
 	
 	@Test
+	public void testGetScorePlayerDeuceTestCase1() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+
+		app.getGame().setPointPlayer1(3);
+		app.getGame().setPointPlayer2(3);
+		
+		assertEquals("DEUCE",app.getScorePlayer(player1));
+		assertEquals("DEUCE",app.getScorePlayer(player2));
+	}
+	
+	@Test
+	public void testGetScorePlayerDeuceTestCase2() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+
+		app.getGame().setPointPlayer1(4);
+		app.getGame().setPointPlayer2(3);
+		
+		assertEquals("ADV",app.getScorePlayer(player1));
+		assertEquals("40",app.getScorePlayer(player2));
+	}
+	
+	@Test
 	public void testAddPointPlayerTestCase1() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException, InputScoreException{
 		Player player1 = new Player("P1");
 		Player player2 = new Player("P2");
@@ -95,8 +122,8 @@ public class AppTest {
 		
 		app.addPointPlayer(player1);
 		
-		assertEquals(30,app.getScorePlayer(player1));
-        assertEquals(0,app.getScorePlayer(player2));
+		assertEquals("30",app.getScorePlayer(player1));
+        assertEquals("0",app.getScorePlayer(player2));
         assertNull(app.getWinner());
 	}
 	
@@ -111,8 +138,8 @@ public class AppTest {
 		
 		app.addPointPlayer(player2);
 		
-		assertEquals(15,app.getScorePlayer(player1));
-        assertEquals(40,app.getScorePlayer(player2));
+		assertEquals("15",app.getScorePlayer(player1));
+        assertEquals("40",app.getScorePlayer(player2));
         assertNull(app.getWinner());
 	}
 	
@@ -127,8 +154,8 @@ public class AppTest {
 		
 		app.addPointPlayer(player2);
 		
-		assertEquals(0,app.getScorePlayer(player1));
-        assertEquals(0,app.getScorePlayer(player2));
+		assertEquals("0",app.getScorePlayer(player1));
+        assertEquals("0",app.getScorePlayer(player2));
         assertNotNull(app.getWinner());
         assertEquals(app.getWinner(), player2);
 	}
@@ -144,33 +171,123 @@ public class AppTest {
 		
 		app.addPointPlayer(player1);
 		
-		assertEquals(0,app.getScorePlayer(player1));
-        assertEquals(0,app.getScorePlayer(player2));
+		assertEquals("0",app.getScorePlayer(player1));
+        assertEquals("0",app.getScorePlayer(player2));
         assertNotNull(app.getWinner());
         assertEquals(app.getWinner(), player1);
 	}
 
 	@Test(expected = NullInputException.class )
-	public void testAddPointPlayerErrorNullCase1() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException{
+	public void testAddPointPlayerErrorNullCase() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException{
 		Player player1 = new Player("P1");
 		Player player2 = new Player("P2");
 		App app = new App(player1, player2);
 		
 		app.getGame().setPointPlayer1(3);
-		app.getGame().setPointPlayer1(1);
+		app.getGame().setPointPlayer2(1);
 		
 		app.addPointPlayer(null);
 	}
 	
 	@Test(expected = UnknownPlayerException.class )
-	public void testAddPointPlayerErrorOtherPlayerCase() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException{
+	public void testAddPointPlayerErrorThirdPlayerCase() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException{
 		Player player1 = new Player("P1");
 		Player player2 = new Player("P2");
 		Player player3 = new Player("P3");
 		App app = new App(player1, player2);
 		
 		app.getGame().setPointPlayer1(3);
-		app.getGame().setPointPlayer1(1);
+		app.getGame().setPointPlayer2(1);
+		
+		app.addPointPlayer(player3);
+	}
+	
+	@Test
+	public void testAddPointPlayerWithDeuceTestCase1() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException, InputScoreException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(2);
+		app.getGame().setPointPlayer2(3);
+		
+		app.addPointPlayer(player1);
+		
+		assertEquals("DEUCE",app.getScorePlayer(player1));
+        assertEquals("DEUCE",app.getScorePlayer(player2));
+        assertNull(app.getWinner());
+	}
+	
+	@Test
+	public void testAddPointPlayerWithDeuceTestCase2() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException, InputScoreException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(3);
+		app.getGame().setPointPlayer2(3);
+		
+		app.addPointPlayer(player2);
+		
+		assertEquals("40",app.getScorePlayer(player1));
+        assertEquals("ADV",app.getScorePlayer(player2));
+        assertNull(app.getWinner());
+	}
+	
+	@Test
+	public void testAddPointPlayerWithDeuceTestCase3() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException, InputScoreException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(3);
+		app.getGame().setPointPlayer2(4);
+		
+		app.addPointPlayer(player2);
+		
+		assertEquals("0",app.getScorePlayer(player1));
+        assertEquals("0",app.getScorePlayer(player2));
+        assertNotNull(app.getWinner());
+        assertEquals(app.getWinner(), player2);
+	}
+	
+	@Test
+	public void testAddPointPlayerWithDeuceTestCase4() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException, InputScoreException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(3);
+		app.getGame().setPointPlayer2(4);
+		
+		app.addPointPlayer(player1);
+		
+		assertEquals("DEUCE",app.getScorePlayer(player1));
+        assertEquals("DEUCE",app.getScorePlayer(player2));
+        assertNull(app.getWinner());
+	}
+	
+	@Test(expected = NullInputException.class )
+	public void testAddPointPlayerWithDeuceErrorNullCase() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(3);
+		app.getGame().setPointPlayer2(4);
+		
+		app.addPointPlayer(null);
+	}
+	
+	@Test(expected = UnknownPlayerException.class )
+	public void testAddPointPlayerWithDeuceErrorThirdPlayerCase() throws NullInputException, IncorrectPlayersInputException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Player player3 = new Player("P3");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(4);
+		app.getGame().setPointPlayer2(3);
 		
 		app.addPointPlayer(player3);
 	}

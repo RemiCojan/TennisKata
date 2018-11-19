@@ -42,12 +42,12 @@ public class App {
 		return game.getWinner();
 	}
 
-	public int getScorePlayer(Player player) throws InputScoreException, NullInputException, UnknownPlayerException {
-		return getPartyManager().convertPointToScore(getPartyManager().getPointOfPlayer(game, player));
+	public String getScorePlayer(Player player) throws InputScoreException, NullInputException, UnknownPlayerException {
+		return getPartyManager().convertPointToScore(getPartyManager().getPointOfPlayer(game, player), getPartyManager().getPointOfPlayer(game, getPartyManager().getOtherPlayer(game, player)));
 	}
 	
 	public void addPointPlayer(Player player) throws NullInputException, UnknownPlayerException {
-		getPartyManager().addPointToPlayer(game, player);
+		getPartyManager().addPointToPlayerAndSetTheWinner(game, player);
 	}
 
 }

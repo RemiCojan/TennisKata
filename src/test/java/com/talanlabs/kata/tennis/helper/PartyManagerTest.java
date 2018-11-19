@@ -18,16 +18,42 @@ public class PartyManagerTest {
 	@Test
 	public void testConvertInScorePoint() throws InputScoreException{
 		PartyManager partyManager = new PartyManager();
-		assertEquals(0,partyManager.convertPointToScore(0));
-		assertEquals(15,partyManager.convertPointToScore(1));
-		assertEquals(30,partyManager.convertPointToScore(2));
-		assertEquals(40,partyManager.convertPointToScore(3));
+		assertEquals("0",partyManager.convertPointToScore( 0, 0));
+		assertEquals("15",partyManager.convertPointToScore( 1, 0));
+		assertEquals("30",partyManager.convertPointToScore( 2, 0));
+		assertEquals("40",partyManager.convertPointToScore( 3, 0));
+    }
+	
+	@Test
+	public void testConvertInScorePointWithDeuce() throws InputScoreException{
+		PartyManager partyManager = new PartyManager();
+		assertEquals("DEUCE",partyManager.convertPointToScore( 3, 3));
+		assertEquals("40",partyManager.convertPointToScore( 3, 4));
+		assertEquals("ADV",partyManager.convertPointToScore( 4, 3));
     }
 	
 	@Test(expected = InputScoreException.class )
-	public void testConvertInScorePointError() throws InputScoreException {
+	public void testConvertInScorePointErrorTestCase1() throws InputScoreException {
 		PartyManager partyManager = new PartyManager();
-		partyManager.convertPointToScore(-1);
+		partyManager.convertPointToScore(-1, 1);
+	}
+	
+	@Test(expected = InputScoreException.class )
+	public void testConvertInScorePointErrorTestCase2() throws InputScoreException {
+		PartyManager partyManager = new PartyManager();
+		partyManager.convertPointToScore(1, -1);
+	}
+	
+	@Test(expected = InputScoreException.class )
+	public void testConvertInScorePointErrorTestCase3() throws InputScoreException {
+		PartyManager partyManager = new PartyManager();
+		partyManager.convertPointToScore(1, 5);
+	}
+	
+	@Test(expected = InputScoreException.class )
+	public void testConvertInScorePointErrorTestCase4() throws InputScoreException {
+		PartyManager partyManager = new PartyManager();
+		partyManager.convertPointToScore(5, 3);
 	}
 	
 	@Test
@@ -71,7 +97,7 @@ public class PartyManagerTest {
 	}
 	
 	@Test(expected = UnknownPlayerException.class )
-	public void testGetIndexOfPlayerErrorOtherPlayerCase() throws NullInputException, UnknownPlayerException{
+	public void testGetIndexOfPlayerErrorThirdPlayerCase() throws NullInputException, UnknownPlayerException{
 		PartyManager partyManager = new PartyManager();
 		Player player1 = new Player("P1");
 		Player player2 = new Player("P2");
@@ -129,7 +155,7 @@ public class PartyManagerTest {
 	}
 	
 	@Test(expected = UnknownPlayerException.class )
-	public void testGetPointPlayerErrorOtherPlayerCase() throws NullInputException, UnknownPlayerException{
+	public void testGetPointPlayerErrorThirdPlayerCase() throws NullInputException, UnknownPlayerException{
 		PartyManager partyManager = new PartyManager();
 		Player player1 = new Player("P1");
 		Player player2 = new Player("P2");
@@ -139,13 +165,58 @@ public class PartyManagerTest {
 	}
 	
 	@Test
+	public void testGetOtherPlayerTestCase() throws NullInputException, UnknownPlayerException{
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Game game = new Game(player1, player2);
+		
+		assertEquals(player1, partyManager.getOtherPlayer(game, player2));
+		assertEquals(player2, partyManager.getOtherPlayer(game, player1));
+	}
+
+	@Test(expected = NullInputException.class )
+	public void testGetOtherPlayerErrorNullCase1() throws NullInputException, UnknownPlayerException {
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Game game = new Game(player1, player2);
+		partyManager.getOtherPlayer(game, null);
+	}
+	
+	@Test(expected = NullInputException.class )
+	public void testGetOtherPlayerErrorNullCase2() throws NullInputException, UnknownPlayerException {
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Game game = new Game(player1, player2);
+		partyManager.getOtherPlayer(null, player1);
+	}
+	
+	@Test(expected = NullInputException.class )
+	public void testGetPointOfOtherPlayerErrorNullCase3() throws NullInputException, UnknownPlayerException {
+		PartyManager partyManager = new PartyManager();
+		partyManager.getOtherPlayer(null, null);
+	}
+	
+	@Test(expected = UnknownPlayerException.class )
+	public void testGetPointOfOtherPlayerErrorThirdPlayerCase() throws NullInputException, UnknownPlayerException{
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Player player3 = new Player("P3");
+		Game game = new Game(player1, player2);
+		partyManager.getOtherPlayer(game, player3);
+	}
+	
+	@Test
 	public void testAddPointToPlayerTestCase1() throws NullInputException, UnknownPlayerException{
 		PartyManager partyManager = new PartyManager();
 		Player player1 = new Player("P1");
 		Player player2 = new Player("P2");
 		Game game = new Game(player1, player2);
 		
-		partyManager.addPointToPlayer(game, player1);
+		partyManager.addPointToPlayerAndSetTheWinner(game, player1);
 		
 		assertEquals(1, game.getPointPlayer1());
 		assertEquals(0, game.getPointPlayer2());
@@ -162,7 +233,7 @@ public class PartyManagerTest {
 		game.setPointPlayer1(2);
 		game.setPointPlayer2(1);
 		
-		partyManager.addPointToPlayer(game, player1);
+		partyManager.addPointToPlayerAndSetTheWinner(game, player1);
 		
 		assertEquals(3, game.getPointPlayer1());
 		assertEquals(1, game.getPointPlayer2());
@@ -178,7 +249,7 @@ public class PartyManagerTest {
 		
 		game.setPointPlayer2(1);
 		
-		partyManager.addPointToPlayer(game, player2);
+		partyManager.addPointToPlayerAndSetTheWinner(game, player2);
 		
 		assertEquals(0, game.getPointPlayer1());
 		assertEquals(2, game.getPointPlayer2());
@@ -195,7 +266,7 @@ public class PartyManagerTest {
 		game.setPointPlayer1(2);
 		game.setPointPlayer2(3);
 		
-		partyManager.addPointToPlayer(game, player2);
+		partyManager.addPointToPlayerAndSetTheWinner(game, player2);
 		
 		assertEquals(0, game.getPointPlayer1());
 		assertEquals(0, game.getPointPlayer2());
@@ -212,7 +283,7 @@ public class PartyManagerTest {
 
 		game.setWinner(player1);
 		
-		partyManager.addPointToPlayer(game, player2);
+		partyManager.addPointToPlayerAndSetTheWinner(game, player2);
 		
 		assertEquals(0, game.getPointPlayer1());
 		assertEquals(0, game.getPointPlayer2());
@@ -224,7 +295,7 @@ public class PartyManagerTest {
 	public void testAddPointToPlayerErrorNullCase1() throws NullInputException, UnknownPlayerException {
 		PartyManager partyManager = new PartyManager();
 		Player player1 = new Player("P1");
-		partyManager.addPointToPlayer(null, player1);
+		partyManager.addPointToPlayerAndSetTheWinner(null, player1);
 	}
 	
 	@Test(expected = NullInputException.class )
@@ -233,23 +304,143 @@ public class PartyManagerTest {
 		Player player1 = new Player("P1");
 		Player player2 = new Player("P2");
 		Game game = new Game(player1, player2);
-		partyManager.addPointToPlayer(game, null);
+		partyManager.addPointToPlayerAndSetTheWinner(game, null);
 	}
 	
 	@Test(expected = NullInputException.class )
 	public void testAddPointToPlayerErrorNullCase3() throws NullInputException, UnknownPlayerException {
 		PartyManager partyManager = new PartyManager();
-		partyManager.addPointToPlayer(null, null);
+		partyManager.addPointToPlayerAndSetTheWinner(null, null);
 	}
 	
 	@Test(expected = UnknownPlayerException.class )
-	public void testAddPointToPlayerErrorOtherPlayerCase() throws NullInputException, UnknownPlayerException{
+	public void testAddPointToPlayerErrorThirdPlayerCase() throws NullInputException, UnknownPlayerException{
 		PartyManager partyManager = new PartyManager();
 		Player player1 = new Player("P1");
 		Player player2 = new Player("P2");
 		Player player3 = new Player("P3");
 		Game game = new Game(player1, player2);
-		partyManager.addPointToPlayer(game, player3);
+		partyManager.addPointToPlayerAndSetTheWinner(game, player3);
+	}
+	
+	@Test
+	public void testAddPointToPlayerWithDeuceTestCase1() throws NullInputException, UnknownPlayerException{
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Game game = new Game(player1, player2);
+		
+		game.setPointPlayer1(2);
+		game.setPointPlayer2(3);
+		
+		partyManager.addPointToPlayerAndSetTheWinner(game, player1);
+		
+		assertEquals(3, game.getPointPlayer1());
+		assertEquals(3, game.getPointPlayer2());
+		assertNull(game.getWinner());
+	}
+	
+	@Test
+	public void testAddPointToPlayerWithDeuceTestCase2() throws NullInputException, UnknownPlayerException{
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Game game = new Game(player1, player2);
+		
+		game.setPointPlayer1(3);
+		game.setPointPlayer2(3);
+		
+		partyManager.addPointToPlayerAndSetTheWinner(game, player1);
+		
+		assertEquals(4, game.getPointPlayer1());
+		assertEquals(3, game.getPointPlayer2());
+		assertNull(game.getWinner());
+	}
+	
+	@Test
+	public void testAddPointToPlayerWithDeuceTestCase3() throws NullInputException, UnknownPlayerException{
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Game game = new Game(player1, player2);
+		
+		game.setPointPlayer1(3);
+		game.setPointPlayer2(4);
+		
+		partyManager.addPointToPlayerAndSetTheWinner(game, player1);
+		
+		assertEquals(3, game.getPointPlayer1());
+		assertEquals(3, game.getPointPlayer2());
+		assertNull(game.getWinner());
+	}
+	
+	@Test
+	public void testAddPointToPlayerWithDeuceTestCase4() throws NullInputException, UnknownPlayerException{
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Game game = new Game(player1, player2);
+		
+		game.setPointPlayer1(3);
+		game.setPointPlayer2(4);
+		
+		partyManager.addPointToPlayerAndSetTheWinner(game, player2);
+		
+		assertEquals(0, game.getPointPlayer1());
+		assertEquals(0, game.getPointPlayer2());
+		assertNotNull(game.getWinner());
+		assertEquals(game.getWinner(), player2);
+	}
+	
+	@Test(expected = NullInputException.class )
+	public void testAddPointToPlayerWithDeuceErrorNullCase1() throws NullInputException, UnknownPlayerException {
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Game game = new Game(player1, player2);
+		
+		game.setPointPlayer1(3);
+		game.setPointPlayer2(3);
+		
+		partyManager.addPointToPlayerAndSetTheWinner(null, player1);
+	}
+	
+	@Test(expected = NullInputException.class )
+	public void testAddPointToPlayerWithDeuceErrorNullCase2() throws NullInputException, UnknownPlayerException {
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Game game = new Game(player1, player2);
+		
+		game.setPointPlayer1(3);
+		game.setPointPlayer2(4);
+		
+		partyManager.addPointToPlayerAndSetTheWinner(null, player2);
+	}
+	
+	@Test(expected = NullInputException.class )
+	public void testAddPointToPlayerWithDeuceErrorNullCase3() throws NullInputException, UnknownPlayerException {
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Game game = new Game(player1, player2);
+		
+		game.setPointPlayer1(3);
+		game.setPointPlayer2(4);
+		
+		partyManager.addPointToPlayerAndSetTheWinner(game, null);
+	}
+	
+	@Test(expected = UnknownPlayerException.class )
+	public void testAddPointToPlayerWithDeuceErrorThirdPlayerCase() throws NullInputException, UnknownPlayerException{
+		PartyManager partyManager = new PartyManager();
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		Player player3 = new Player("P3");
+		Game game = new Game(player1, player2);
+		game.setPointPlayer1(3);
+		game.setPointPlayer2(4);
+		partyManager.addPointToPlayerAndSetTheWinner(game, player3);
 	}
 	
 }
