@@ -7,10 +7,11 @@ import com.talanlabs.kata.tennis.manager.PartyManager;
 import com.talanlabs.kata.tennis.manager.UnknownPlayerException;
 import com.talanlabs.kata.tennis.model.Game;
 import com.talanlabs.kata.tennis.model.Player;
+import com.talanlabs.kata.tennis.model.Set;
 
 public class App {
 
-	protected Game game;
+	protected Set set;
 	
 	protected PartyManager partyManager;
 
@@ -18,7 +19,7 @@ public class App {
 		super();
 		if(player1!=null && player2!=null) {
 			if(player1!=player2) {
-				game = new Game(player1, player2);
+				set = new Set(player1, player2);
 			}else {
 				throw new IncorrectPlayersInputException();
 			}
@@ -33,21 +34,28 @@ public class App {
 		}
 		return partyManager;
 	}
+	
+	public Set getSet() {
+		return set;
+	}
 
 	public Game getGame() {
-		return game;
+		return set.getGame();
 	}
 
 	public Player getWinner() {
-		return game.getWinner();
+		return set.getWinner();
 	}
 
-	public String getScorePlayer(Player player) throws InputScoreException, NullInputException, UnknownPlayerException {
-		return getPartyManager().convertPointToScore(getPartyManager().getPointOfPlayer(game, player), getPartyManager().getPointOfPlayer(game, getPartyManager().getOtherPlayer(game, player)));
+	public String getGameScorePlayer(Player player) throws InputScoreException, NullInputException, UnknownPlayerException{
+		return getPartyManager().getGameScorePlayer(set, player);
 	}
 	
-	public void addPointPlayer(Player player) throws NullInputException, UnknownPlayerException {
-		getPartyManager().addPointToPlayerAndSetTheWinner(game, player);
+	public int getSetScorePlayer(Player player) throws NullInputException, UnknownPlayerException {
+		return getPartyManager().getSetPointOfPlayer(set, player);
 	}
-
+	
+	public void addPointPlayer(Player player) throws NullInputException, UnknownPlayerException{
+		getPartyManager().addPointToPlayerAndSetTheWinner(set, player);
+	}
 }
