@@ -4,7 +4,7 @@ import com.talanlabs.kata.tennis.model.Game;
 import com.talanlabs.kata.tennis.model.Player;
 import com.talanlabs.kata.tennis.model.Set;
 
-public class PartyManager { // instancier dans app
+public class PartyManager {
 	
 	public static final int LIMIT_GAME_POINT_TO_WIN = 3;
 	public static final int LIMIT_GAME_POINT_TO_WIN_WITH_DEUCE= 4;
@@ -12,8 +12,13 @@ public class PartyManager { // instancier dans app
 	public static final int LIMIT_SET_POINT_TO_WIN = 5;
 	public static final int LIMIT_SET_POINT_TO_WIN_IN_TIGHT_CASE= 6;
 	
+	public static final int TIE_BREAKER_STARTING_SET_POINT = 6;
+	public static final int LIMIT_GAME_POINT_TO_WIN_WITH_TIE_BREAKER = 6;
+	
 	public String getGameScorePlayer(Set set, Player player) throws InputScoreException, NullInputException, UnknownPlayerException{
-		return convertGamePointToGameScore(getGamePointOfPlayer(set, player), getGamePointOfPlayer(set, getOtherPlayer(set, player)));
+		return isTieBreakerGame(set)? 
+				convertGamePointToTieBreakerGameScore(getGamePointOfPlayer(set, player))
+				: convertGamePointToGameScore(getGamePointOfPlayer(set, player), getGamePointOfPlayer(set, getOtherPlayer(set, player)));
 	}
 
 	private String convertGamePointToGameScore(int i, int j) throws InputScoreException {
@@ -43,6 +48,21 @@ public class PartyManager { // instancier dans app
 		}
 		
 		return score;
+	}
+	
+
+	private String convertGamePointToTieBreakerGameScore(int i) throws InputScoreException {
+		if(i<0) {
+			throw new InputScoreException();
+		}
+		return Integer.toString(i);
+	}
+	
+	private boolean isTieBreakerGame(Set set) throws NullInputException {
+		if(set==null) {
+			throw new NullInputException();
+		}
+		return set.getPointPlayer1()==TIE_BREAKER_STARTING_SET_POINT && set.getPointPlayer2()==TIE_BREAKER_STARTING_SET_POINT;
 	}
 	
 	private boolean isFirstPlayer(Set set, Player player) throws NullInputException, UnknownPlayerException {
@@ -94,8 +114,8 @@ public class PartyManager { // instancier dans app
 	public void addPointToPlayerAndSetTheWinner(Set set, Player player) throws NullInputException, UnknownPlayerException {
 		if(set!=null) {
 			if(set.getWinner()==null) {
-				if(addGamePointToPlayerAndReturnGameVictory(set.getGame(), isFirstPlayer(set, player))) {
-					addSetPointToPlayerAndSetTheSetWinner(set, player, set.getPointPlayer1() + set.getPointPlayer2() > 9);
+				if(addGamePointToPlayerAndReturnGameVictory(set.getGame(), isFirstPlayer(set, player), isTieBreakerGame(set))) {
+					addSetPointToPlayerAndSetTheSetWinner(set, player, isTightSet(set));
 				}
 			}
 		}else {
@@ -103,28 +123,51 @@ public class PartyManager { // instancier dans app
 		}
 	}
 
+	private boolean isTightSet(Set set) throws NullInputException {
+		if(set==null) {
+			throw new NullInputException();
+		}
+		return set.getPointPlayer1() + set.getPointPlayer2() > 9; // on ne peut dépacer 9 que si les deux joueurs ont au moins 5.
+	}
+
 	private void addSetPointToPlayerAndSetTheSetWinner(Set set, Player player, boolean isTightSet) throws NullInputException, UnknownPlayerException {
-		if((isTightSet && getSetPointOfPlayer(set, player)==LIMIT_SET_POINT_TO_WIN_IN_TIGHT_CASE) //
-				|| (!isTightSet && getSetPointOfPlayer(set, player)==LIMIT_SET_POINT_TO_WIN)) {
-			setSetVinner(player, set);
+		if(isWinningSetPointToPlayer(set ,player , isTightSet)) {
+			setSetWinner(player, set);
 		}else {
 			addSetPointToPlayer(set, isFirstPlayer(set,player));
 		}
 	}
+	
+	private boolean isWinningSetPointToPlayer(Set set, Player player, boolean isTightSet) throws NullInputException, UnknownPlayerException {
+		if(set==null || player==null) {
+			throw new NullInputException();
+		}
+		return (isTightSet && getSetPointOfPlayer(set, player)==LIMIT_SET_POINT_TO_WIN_IN_TIGHT_CASE)
+				|| (!isTightSet && getSetPointOfPlayer(set, player)==LIMIT_SET_POINT_TO_WIN);
+	}
 
-	private boolean addGamePointToPlayerAndReturnGameVictory(Game game, boolean isFirstPlayer) throws NullInputException, UnknownPlayerException{
+	private boolean addGamePointToPlayerAndReturnGameVictory(Game game, boolean isFirstPlayer, boolean isTieBreakerGame) throws NullInputException, UnknownPlayerException{
 		boolean isWinningPoint;
-		if(game.getPointPlayer1() + game.getPointPlayer2() > 5) {
+		if(isTieBreakerGame) {
+			isWinningPoint = addPointToPlayerAndReturnGameVictoryTieBreaker(game, isFirstPlayer);
+		}else if(isDeuceCase(game)) {
 			isWinningPoint = addPointToPlayerAndReturnGameVictoryWithDeuce(game, isFirstPlayer);
 		}else {
 			isWinningPoint = addPointToPlayerAndReturnGameVictoryClassic(game, isFirstPlayer);
 		}
 		return isWinningPoint;
 	}
+
+	private boolean isDeuceCase(Game game) throws NullInputException {
+		if(game==null) {
+			throw new NullInputException();
+		}
+		return game.getPointPlayer1() + game.getPointPlayer2() > 5; // on ne peut dépacer 5 point que si les deux joueurs ont au moins 3.
+	}
 	
 	private boolean addPointToPlayerAndReturnGameVictoryClassic(Game game, boolean isFirstPlayer) throws NullInputException, UnknownPlayerException{
 		boolean isWinningPoint= false;
-		if(getGamePointOfPlayer(game, isFirstPlayer)==LIMIT_GAME_POINT_TO_WIN) {
+		if(isWinningGamePointToPlayer(game, isFirstPlayer, false)) {
 			reinitGame(game);
 			isWinningPoint = true;
 		}else {
@@ -135,16 +178,49 @@ public class PartyManager { // instancier dans app
 	
 	private boolean addPointToPlayerAndReturnGameVictoryWithDeuce(Game game, boolean isFirstPlayer) throws NullInputException, UnknownPlayerException {
 		boolean isWinningPoint= false;
-		if(getGamePointOfPlayer(game, isFirstPlayer)==LIMIT_GAME_POINT_TO_WIN_WITH_DEUCE) {
+		if(isWinningGamePointToPlayer(game, isFirstPlayer, true)) {
 			reinitGame(game);
 			isWinningPoint = true;
-		}else if(game.getPointPlayer1()+game.getPointPlayer2()>6){
+		}else if(isDeuceGamePointReinitialisationNeeded(game)){
 			game.setPointPlayer1(3);
 			game.setPointPlayer2(3);
 		}else {
 			addGamePointToPlayer(game, isFirstPlayer);
 		}
 		return isWinningPoint;
+	}
+	
+	private boolean addPointToPlayerAndReturnGameVictoryTieBreaker(Game game, boolean isFirstPlayer) throws NullInputException {
+		boolean isWinningPoint= false;
+		if(isWinningGamePointToPlayerInTieBreakerCase(game, isFirstPlayer)) {
+			reinitGame(game);
+			isWinningPoint = true;
+		}else {
+			addGamePointToPlayer(game, isFirstPlayer);
+		}
+		return isWinningPoint;
+	}
+	
+	private boolean isWinningGamePointToPlayerInTieBreakerCase(Game game, boolean isFirstPlayer) throws NullInputException {
+		if(game==null) {
+			throw new NullInputException();
+		}
+		return getGamePointOfPlayer(game, isFirstPlayer)>getGamePointOfPlayer(game, !isFirstPlayer) 
+				&& getGamePointOfPlayer(game, isFirstPlayer)>=LIMIT_GAME_POINT_TO_WIN_WITH_TIE_BREAKER;
+	}
+
+	private boolean isWinningGamePointToPlayer(Game game, boolean isFirstPlayer, boolean isDeuce) throws NullInputException, UnknownPlayerException {
+		if(game==null) {
+			throw new NullInputException();
+		}
+		return isDeuce ? getGamePointOfPlayer(game, isFirstPlayer)==LIMIT_GAME_POINT_TO_WIN_WITH_DEUCE : getGamePointOfPlayer(game, isFirstPlayer)==LIMIT_GAME_POINT_TO_WIN;
+	}
+	
+	private boolean isDeuceGamePointReinitialisationNeeded(Game game) throws NullInputException {
+		if(game==null) {
+			throw new NullInputException();
+		}
+		return game.getPointPlayer1()+game.getPointPlayer2()>6;
 	}
 	
 	private void reinitGame(Game game) throws NullInputException {
@@ -156,7 +232,7 @@ public class PartyManager { // instancier dans app
 		}
 	}
 	
-	private void setSetVinner(Player player, Set set) throws NullInputException {
+	private void setSetWinner(Player player, Set set) throws NullInputException {
 		if(set!=null) {
 			set.setWinner(player);
 			set.setPointPlayer1(0);

@@ -121,6 +121,68 @@ public class AppTest {
 		assertEquals("40",app.getGameScorePlayer(player2));
 	}
 	
+//  test getGameScorePlayer with Tie breaker rules
+	
+	@Test
+	public void testGetGameScorePlayerTieBreakerTestCase1() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+
+		app.getGame().setPointPlayer1(2);
+		app.getGame().setPointPlayer2(3);
+		app.getSet().setPointPlayer1(6);
+		app.getSet().setPointPlayer2(6);
+		
+		assertEquals("2",app.getGameScorePlayer(player1));
+		assertEquals("3",app.getGameScorePlayer(player2));
+	}
+	
+	@Test
+	public void testGetGameScorePlayerTieBreakerTestCase2() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+
+		app.getGame().setPointPlayer1(3);
+		app.getGame().setPointPlayer2(3);
+		app.getSet().setPointPlayer1(6);
+		app.getSet().setPointPlayer2(6);
+		
+		assertEquals("3",app.getGameScorePlayer(player1));
+		assertEquals("3",app.getGameScorePlayer(player2));
+	}
+	
+	@Test
+	public void testGetGameScorePlayerTieBreakerTestCase3() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+
+		app.getGame().setPointPlayer1(4);
+		app.getGame().setPointPlayer2(3);
+		app.getSet().setPointPlayer1(6);
+		app.getSet().setPointPlayer2(6);
+		
+		assertEquals("4",app.getGameScorePlayer(player1));
+		assertEquals("3",app.getGameScorePlayer(player2));
+	}
+	
+	@Test
+	public void testGetGameScorePlayerTieBreakerTestCase4() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+
+		app.getGame().setPointPlayer1(7);
+		app.getGame().setPointPlayer2(8);
+		app.getSet().setPointPlayer1(6);
+		app.getSet().setPointPlayer2(6);
+		
+		assertEquals("7",app.getGameScorePlayer(player1));
+		assertEquals("8",app.getGameScorePlayer(player2));
+	}
+	
 	// test getSetScorePlayer
 	
 	@Test
@@ -506,8 +568,30 @@ public class AppTest {
         assertEquals(player2,app.getWinner());
 	}
 	
+	// test addPointPlayer for the end of a set in case of tie
+	
 	@Test
-	public void testAddPointPlayerAndWinSetTestCase4() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+	public void testAddPointPlayerInTieBreakerGameTestCase1() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(3);
+		app.getGame().setPointPlayer2(1);
+		app.getSet().setPointPlayer1(6);
+		app.getSet().setPointPlayer2(6);
+		
+		app.addPointPlayer(player1);
+		
+		assertEquals("4",app.getGameScorePlayer(player1));
+        assertEquals("1",app.getGameScorePlayer(player2));
+        assertEquals(6,app.getSetScorePlayer(player1));
+	    assertEquals(6,app.getSetScorePlayer(player2));
+        assertNull(app.getWinner());
+	}
+	
+	@Test
+	public void testAddPointPlayerInTieBreakerGameTestCase2() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
 		Player player1 = new Player("P1");
 		Player player2 = new Player("P2");
 		App app = new App(player1, player2);
@@ -519,11 +603,113 @@ public class AppTest {
 		
 		app.addPointPlayer(player1);
 		
+		assertEquals("5",app.getGameScorePlayer(player1));
+        assertEquals("3",app.getGameScorePlayer(player2));
+        assertEquals(6,app.getSetScorePlayer(player1));
+	    assertEquals(6,app.getSetScorePlayer(player2));
+        assertNull(app.getWinner());
+	}
+	
+	@Test
+	public void testAddPointPlayerInTieBreakerGameTestCase3() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(3);
+		app.getGame().setPointPlayer2(6);
+		app.getSet().setPointPlayer1(6);
+		app.getSet().setPointPlayer2(6);
+		
+		app.addPointPlayer(player2);
+		
 		assertEquals("0",app.getGameScorePlayer(player1));
         assertEquals("0",app.getGameScorePlayer(player2));
         assertEquals(0,app.getSetScorePlayer(player1));
 	    assertEquals(0,app.getSetScorePlayer(player2));
-        assertNotNull(app.getWinner());
+	    assertNotNull(app.getWinner());
+        assertEquals(player2,app.getWinner());
+	}
+	
+	@Test
+	public void testAddPointPlayerInTieBreakerGameTestCase4() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(6);
+		app.getGame().setPointPlayer2(6);
+		app.getSet().setPointPlayer1(6);
+		app.getSet().setPointPlayer2(6);
+		
+		app.addPointPlayer(player1);
+		
+		assertEquals("7",app.getGameScorePlayer(player1));
+        assertEquals("6",app.getGameScorePlayer(player2));
+        assertEquals(6,app.getSetScorePlayer(player1));
+	    assertEquals(6,app.getSetScorePlayer(player2));
+	    assertNull(app.getWinner());
+	}
+	
+	@Test
+	public void testAddPointPlayerInTieBreakerGameTestCase5() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(7);
+		app.getGame().setPointPlayer2(6);
+		app.getSet().setPointPlayer1(6);
+		app.getSet().setPointPlayer2(6);
+		
+		app.addPointPlayer(player1);
+		
+		assertEquals("0",app.getGameScorePlayer(player1));
+        assertEquals("0",app.getGameScorePlayer(player2));
+        assertEquals(0,app.getSetScorePlayer(player1));
+	    assertEquals(0,app.getSetScorePlayer(player2));
+	    assertNotNull(app.getWinner());
+        assertEquals(player1,app.getWinner());
+	}
+	
+	@Test
+	public void testAddPointPlayerInTieBreakerGameTestCase6() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(8);
+		app.getGame().setPointPlayer2(8);
+		app.getSet().setPointPlayer1(6);
+		app.getSet().setPointPlayer2(6);
+		
+		app.addPointPlayer(player2);
+		
+		assertEquals("8",app.getGameScorePlayer(player1));
+        assertEquals("9",app.getGameScorePlayer(player2));
+        assertEquals(6,app.getSetScorePlayer(player1));
+	    assertEquals(6,app.getSetScorePlayer(player2));
+	    assertNull(app.getWinner());
+	}
+	
+	@Test
+	public void testAddPointPlayerInTieBreakerGameTestCase7() throws NullInputException, IncorrectPlayersInputException, InputScoreException, UnknownPlayerException{
+		Player player1 = new Player("P1");
+		Player player2 = new Player("P2");
+		App app = new App(player1, player2);
+		
+		app.getGame().setPointPlayer1(9);
+		app.getGame().setPointPlayer2(8);
+		app.getSet().setPointPlayer1(6);
+		app.getSet().setPointPlayer2(6);
+		
+		app.addPointPlayer(player1);
+		
+		assertEquals("0",app.getGameScorePlayer(player1));
+        assertEquals("0",app.getGameScorePlayer(player2));
+        assertEquals(0,app.getSetScorePlayer(player1));
+	    assertEquals(0,app.getSetScorePlayer(player2));
+	    assertNotNull(app.getWinner());
         assertEquals(player1,app.getWinner());
 	}
 }
